@@ -1,0 +1,5 @@
+FROM openjdk:8
+ADD target/gradestore.jar gradestore.jar
+EXPOSE 8087
+ENTRYPOINT ["java", "-jar", "gradestore.jar"]
+CMD ["8087", "docker"]

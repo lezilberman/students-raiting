@@ -1,0 +1,8 @@
+D:\ECLIPSE-OXYGEN\students-raiting\students-grade-generator\src\main\java\com\students\StudentsGradeGeneratorApp.java
+D:\ECLIPSE-OXYGEN\students-raiting\students-grade-generator\src\main\java\com\students\config\StudentKeyExtractor.java
+D:\ECLIPSE-OXYGEN\students-raiting\students-grade-generator\src\main\java\com\students\utils\StudentsUtils.java
+D:\ECLIPSE-OXYGEN\students-raiting\students-grade-generator\src\main\java\com\students\serde\ProtoStudentSerializer.java
+D:\ECLIPSE-OXYGEN\students-raiting\students-grade-generator\src\main\java\com\students\service\StudentsGenerator.java
+D:\ECLIPSE-OXYGEN\students-raiting\students-grade-generator\src\main\java\com\students\config\StudentProducerConfig.java
+D:\ECLIPSE-OXYGEN\students-raiting\students-grade-generator\src\main\java\com\students\model\Student.java
+D:\ECLIPSE-OXYGEN\students-raiting\students-grade-generator\src\main\java\com\students\serde\ProtoStudentDeserializer.java
