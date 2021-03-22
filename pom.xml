@@ -10,7 +10,6 @@
   <description>Parent project for kafka producer/consumer</description>
   
   <modules>
-  	<module>customer-web-service</module>
   	<module>students-grade-generator</module>
   	<module>students-web-service</module>
   </modules>
