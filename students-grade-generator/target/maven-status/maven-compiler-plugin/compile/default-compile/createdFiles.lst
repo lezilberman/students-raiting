@@ -1,8 +1,0 @@
-com\students\service\StudentsGenerator.class
-com\students\serde\ProtoStudentSerializer.class
-com\students\config\StudentKeyExtractor.class
-com\students\model\Student.class
-com\students\StudentsGradeGeneratorApp.class
-com\students\utils\StudentsUtils.class
-com\students\config\StudentProducerConfig.class
-com\students\serde\ProtoStudentDeserializer.class
