@@ -1,3 +1,5 @@
+CHANGE ADDED FOR TESTING PUSH INTO REMOTE FIXES BRANCH
+
 1. Brief description of the task
 ================================
 It is required to build a scalable fault tolerant application that calculates the average grade for 
