@@ -3,7 +3,8 @@ package com.students;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import static com.students.utils.StudentsUtils.getDefaultDuration;
+
+import com.students.mock.DataGenerator;
 
 @SpringBootApplication
 public class StudentsGradeGeneratorApp {
@@ -11,7 +12,9 @@ public class StudentsGradeGeneratorApp {
 	public static void main(String[] args) {
 	    ConfigurableApplicationContext ctx = SpringApplication.run(StudentsGradeGeneratorApp.class, args);
 
-        long duration = Long.parseLong(ctx.getEnvironment().getProperty("threadDuration", getDefaultDuration()));
+        long duration = DataGenerator.getThreadDuration();
+        System.out.println("##### Thread Duration = " + duration);
+        
 		try {
 			Thread.sleep(duration);   
 			ctx.close();

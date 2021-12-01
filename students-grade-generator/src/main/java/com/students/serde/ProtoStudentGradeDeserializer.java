@@ -3,22 +3,22 @@ package com.students.serde;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.Deserializer;
 
-import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.protobuf.ProtobufMapper;
 import com.fasterxml.jackson.dataformat.protobuf.schema.ProtobufSchema;
 import com.fasterxml.jackson.dataformat.protobuf.schema.ProtobufSchemaLoader;
-import com.students.model.Student;
+import com.students.model.StudentGrade;
 
-public class ProtoStudentSerializer implements Serializer<Student> {
+public class ProtoStudentGradeDeserializer implements Deserializer<StudentGrade> {
 
     static ProtobufMapper mapper = new ProtobufMapper ();
 	static String protobuf_str = "message Student {\n"
-	            + " required int32 id = 1;\n"
-			    + " required string name = 2;\n"
-	            + " required int32 grade = 3;\n"
-	            + "}\n";
+            + " required int32 id = 1;\n"
+		    + " required string name = 2;\n"
+            + " required int32 grade = 3;\n"
+            + "}\n";
 	static ProtobufSchema schema;
 
 	static {
@@ -28,20 +28,20 @@ public class ProtoStudentSerializer implements Serializer<Student> {
 	      throw new RuntimeException(e);
 	    }
 	}
-    static ObjectWriter writer = mapper.writer(schema);
+    static ObjectReader reader = mapper.reader(schema).forType(StudentGrade.class);
 	
-	public byte[] serialize(String topic, Student data) {
-	    byte[] protobufData=null;
-	    
+	public StudentGrade deserialize(String topic, byte[] data) {
+		
+		StudentGrade student = null;
+		
 		try {
-			protobufData = writer.writeValueAsBytes(data);
+			student = reader.readValue(data);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		return protobufData;
+		return student;
 	}
-
+	
 	public void close() {
 		
 	}
@@ -49,6 +49,5 @@ public class ProtoStudentSerializer implements Serializer<Student> {
 	public void configure(Map<String, ?> arg0, boolean arg1) {
 		
 	}
-
 
 }
