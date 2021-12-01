@@ -1,18 +1,18 @@
-package com.students.config;
+package com.students.partitioning;
 
 import org.springframework.cloud.stream.binder.PartitionKeyExtractorStrategy;
 import org.springframework.messaging.Message;
 
-import com.students.model.Student;
-import com.students.serde.ProtoStudentDeserializer;
+import com.students.model.StudentGrade;
+import com.students.serde.ProtoStudentGradeDeserializer;
 
 public class StudentKeyExtractor implements PartitionKeyExtractorStrategy {
 
-	private ProtoStudentDeserializer deserializer = new ProtoStudentDeserializer();
+	private ProtoStudentGradeDeserializer deserializer = new ProtoStudentGradeDeserializer();
 	
 	public Object extractKey(Message<?> message) {
 		byte[] payload = (byte[]) message.getPayload();
-		Student student = deserializer.deserialize("", payload); 
+		StudentGrade student = deserializer.deserialize("", payload); 
 		return student.getId(); 
 	}
 
