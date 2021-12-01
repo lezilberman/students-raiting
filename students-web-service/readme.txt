@@ -5,7 +5,7 @@ each student from the stream of student's grades, from the beginning of studies.
 run as Docker containers. The results per student Id must be available through the REST API endpoint.
 
 2. Project structure
-====================
+====================++
 The Kafka Streams students-rating project consists of two modules:
 
 1) students-grade-generator - data producer.
