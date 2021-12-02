@@ -35,7 +35,7 @@ public class GradeStore {
         builder.gradeCount = copy.gradeCount;
         return builder;
     }
-    public static Builder newBuilder(Student student) {
+    public static Builder newBuilder(StudentGrade student) {
         Builder builder = new Builder();
         builder.studentId = student.id;
         builder.studentName = student.name;

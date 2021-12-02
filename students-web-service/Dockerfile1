@@ -1,5 +1,6 @@
 FROM openjdk:8
 ADD target/gradestore.jar gradestore.jar
+ADD partitions.yml partitions.yml
 EXPOSE 8088
 ENTRYPOINT ["java", "-jar", "gradestore.jar"]
 CMD ["8088", "docker"]

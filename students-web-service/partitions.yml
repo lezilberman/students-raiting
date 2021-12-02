@@ -1,0 +1,13 @@
+# used in: 
+# 1) InteractiveQueryServer as port/host map 
+# 2) ConsumerRunner to count partition number before repartitioning 
+# 3) add/remove partition operation
+
+"8087": gradestore0
+"8088": gradestore1   
+"8089": gradestore2
+
+
+   
+
+      

@@ -2,15 +2,17 @@ package com.students;
 
 import org.springframework.boot.CommandLineRunner;
 
-import com.students.config.DeserializerErrorHandler;
-import com.students.config.StudentPartitioner;
+import com.students.exception.DeserializerErrorHandler;
 import com.students.model.GradeStore;
-import com.students.model.Student;
+import com.students.model.StudentGrade;
+import com.students.partitioning.StudentGradePartitioner;
 import com.students.restore.LoggingStateRestoreListener;
 import com.students.serde.GradeStoreSerde;
-import com.students.serde.StudentSerde;
+import com.students.serde.StudentGradeSerde;
+import com.students.utils.ServiceUtils;
 import com.students.web.InteractiveQueryServer;
 
+import org.apache.commons.configuration2.YAMLConfiguration;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -34,59 +36,54 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static com.students.model.StudentsConstants.*;
 
+import java.io.FileInputStream;
 import java.util.Properties;
 
 public class ConsumerRunner implements CommandLineRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsumerRunner.class);
-
+    
 	public void run(String... args) throws Exception {
 
-// INITIALISATION PROPERTIES & APPLICATION CONFIGURATION ///////////////////////////		
-		// prepare data for InteractiveQueryServer
-        if(args.length > 0 && !tryParseInt(args[0])){
-            LOG.error("Port value must be a number");
-            System.exit(1);
-        }
-		int port = args.length > 0 ? Integer.parseInt(args[0]) : PORT;
-		final HostInfo hostInfo = new HostInfo(HOST, port);
-
-        // configuring app.mode: "application" or "docker"
+// PASS ARGS TO THE START POINT & CONFIG APP. ///////////////////////////
+		
+		// get partitions config to: count partitions, validate ports,  
+		YAMLConfiguration config = new YAMLConfiguration();
+		config.read(new FileInputStream("./partitions.yml"));
+		
+		final int PARTITION_COUNT = config.size();		
+		HostInfo hostInfo = validateArgs(config, args);
 		String mode = args.length > 1 ? args[1] : DOCKER_MODE;
-		if(!mode.equals(APP_MODE) && !mode.equals(DOCKER_MODE) ) {
-            LOG.error("Application mode must be defined as {} or {} ", APP_MODE, DOCKER_MODE);
-            System.exit(1);			
-		}
-		LOG.info("### Application mode is {}", mode); 
-
+		
 		// configuring consumer and queryServer
 		Properties properties = initProperties(mode);
-		properties.put(StreamsConfig.APPLICATION_SERVER_CONFIG, HOST + ":" + port);		
+		properties.put(StreamsConfig.APPLICATION_SERVER_CONFIG, hostInfo.host() + ":" + hostInfo.port());		
 		
         // prepare objects for source stream
         Serde<Integer> integerSerde = Serdes.Integer();
-        Serde<Student> studentSerde = StudentSerde.StudentsSerde();
+        Serde<StudentGrade> studentSerde = StudentGradeSerde.StudentsSerde();
         
         StreamsBuilder streamBuilder = new StreamsBuilder();
 
-// CREATE AND PROCESS DATA STREAM //////////////////////////////////////////////////      
+// CREATE AND PROCESS DATA STREAM //////////////////////////////////////////////////   
+        
         // source stream with record key
-        KStream<Integer, Student> studentsStream = streamBuilder.stream(STUDENTS_TOPIC, Consumed.with(integerSerde, studentSerde));
+        KStream<Integer, StudentGrade> studentsStream = streamBuilder.stream(STUDENTS_TOPIC, Consumed.with(integerSerde, studentSerde));
         
-        KeyValueMapper<Integer, Student, Integer> mapper = (key, student) -> student.getId();
+        KeyValueMapper<Integer, StudentGrade, Integer> mapper = (key, student) -> student.getId();
         
-        KStream<Integer, Student> studentsKeyStream = studentsStream.selectKey(mapper);
+        KStream<Integer, StudentGrade> studentsKeyStream = studentsStream.selectKey(mapper);
 //        		.peek((k, v) -> System.out.printf("=== KEY STUDENT === key = %4d, grade = %4d\n", k, v.getGrade()));
 
         // preparing objects for re-partitioning of source key-stream
-        StudentPartitioner studentPartitioner = new StudentPartitioner();        
+        StudentGradePartitioner studentPartitioner = new StudentGradePartitioner();        
         
-		Repartitioned<Integer, Student> repartitioned = Repartitioned
-		.with(integerSerde, studentSerde).withNumberOfPartitions(PARTITION_COUNT)
+		Repartitioned<Integer, StudentGrade> repartitioned = Repartitioned
+		.with(integerSerde, studentSerde).withNumberOfPartitions(PARTITION_COUNT) 
 		.withName(INNER_TOPIC).withStreamPartitioner(studentPartitioner);
         
 		// create partitioned stream
-		KStream<Integer, Student> partStudentStream = studentsKeyStream.repartition(repartitioned);
+		KStream<Integer, StudentGrade> partStudentStream = studentsKeyStream.repartition(repartitioned);
 //				.peek((k, v) -> System.out.printf("||| STUDENT ||| id = %4d   grade = %4d\n", k, v.getGrade()));
 		
 		// preparing objects for aggregation of the partitioned stream
@@ -108,13 +105,14 @@ public class ConsumerRunner implements CommandLineRunner {
 		.peek((k, v) -> System.out.printf("||| STUDENT |||  id = %4d   avg.grade = %4d\n", k, v.calcAvgGrade()));
 		
 // PREPARE AND START APPLICATION ///////////////////////////////////////////////////
+		
 		// prepare data for KafkaStreams creation
 		Topology topology = streamBuilder.build();
 		
         // create/init consumer 
 		KafkaStreams kafkaStreams = new KafkaStreams(topology, properties);
         // create queryServer
-		InteractiveQueryServer queryServer = new InteractiveQueryServer(kafkaStreams, hostInfo, mode); 
+		InteractiveQueryServer queryServer = new InteractiveQueryServer(kafkaStreams, hostInfo, mode, config); 
 		
         kafkaStreams.setGlobalStateRestoreListener(new LoggingStateRestoreListener());
         kafkaStreams.setStateListener(((newState, oldState) -> {
@@ -137,10 +135,43 @@ public class ConsumerRunner implements CommandLineRunner {
         // start consumer
         LOG.info("Kafks streams started");
         kafkaStreams.cleanUp();
-        kafkaStreams.start(); 
-		
+        kafkaStreams.start(); 		
 	}
 
+    private HostInfo validateArgs(YAMLConfiguration config, String... args) {
+		// port for Application WebServer: 
+		// validation
+		if(args.length == 0) {
+            LOG.error("Port number must be passed as an argument");
+            System.exit(1);			
+		}
+		else if(!ServiceUtils.tryParseInt(args[0])) {
+            LOG.error("Port value must be a number");
+            System.exit(1);
+        }
+		if (!config.containsKey(args[0])) {
+            LOG.error("Port value out of bounds defined by configuration");
+            System.exit(1);			
+		}
+		String strPort = args[0]; // used below as map key
+		int port = Integer.parseInt(strPort);
+
+        // app.mode: "application" or "docker"(default value)
+		String mode = args.length > 1 ? args[1] : DOCKER_MODE;
+		if(!mode.equals(APP_MODE) && !mode.equals(DOCKER_MODE) ) {
+            LOG.error("Application mode must be defined as {} or {} ", APP_MODE, DOCKER_MODE);
+            System.exit(1);			
+		}
+		
+		// host/HostInfo for Application WebServer config 
+		// in APP_MODE, intended for debugging, we use only localhost
+		String host = mode.equals(APP_MODE)? LOCAL_HOST : config.get(String.class, strPort);
+		HostInfo hostInfo = new HostInfo(host, port);
+		LOG.info("### Application Started with HOST: {} PORT: {} MODE: {}", host, port, mode); 
+    	
+    	return hostInfo;
+    }
+	
     private static void shutdown(KafkaStreams kafkaStreams, InteractiveQueryServer queryServer) {
         LOG.info("Shutting down the application and query server");
         kafkaStreams.close();
@@ -161,13 +192,5 @@ public class ConsumerRunner implements CommandLineRunner {
 	    
 	    return props;
 	}       
-    private boolean tryParseInt(String value) {
-	   try {
-	       Integer.parseInt(value);
-	       return true;
-	   } catch (NumberFormatException ex) {
-	      return false;
-	   }
-	}    
 	
 }
