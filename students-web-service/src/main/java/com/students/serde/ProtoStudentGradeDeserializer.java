@@ -9,12 +9,12 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.protobuf.ProtobufMapper;
 import com.fasterxml.jackson.dataformat.protobuf.schema.ProtobufSchema;
 import com.fasterxml.jackson.dataformat.protobuf.schema.ProtobufSchemaLoader;
-import com.students.model.Student;
+import com.students.model.StudentGrade;
 
-public class ProtoStudentDeserializer implements Deserializer<Student> {
+public class ProtoStudentGradeDeserializer implements Deserializer<StudentGrade> {
 
     static ProtobufMapper mapper = new ProtobufMapper ();
-	static String protobuf_str = "message Student {\n"
+	static String protobuf_str = "message StudentGrade {\n"
             + " required int32 id = 1;\n"
 		    + " required string name = 2;\n"
             + " required int32 grade = 3;\n"
@@ -28,11 +28,11 @@ public class ProtoStudentDeserializer implements Deserializer<Student> {
 	      throw new RuntimeException(e);
 	    }
 	}
-    static ObjectReader reader = mapper.reader(schema).forType(Student.class);
+    static ObjectReader reader = mapper.reader(schema).forType(StudentGrade.class);
 	
-	public Student deserialize(String topic, byte[] data) {
+	public StudentGrade deserialize(String topic, byte[] data) {
 		
-		Student student = null;
+		StudentGrade student = null;
 		
 		try {
 			student = reader.readValue(data);

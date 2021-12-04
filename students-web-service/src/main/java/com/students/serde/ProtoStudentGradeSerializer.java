@@ -9,12 +9,12 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.protobuf.ProtobufMapper;
 import com.fasterxml.jackson.dataformat.protobuf.schema.ProtobufSchema;
 import com.fasterxml.jackson.dataformat.protobuf.schema.ProtobufSchemaLoader;
-import com.students.model.Student;
+import com.students.model.StudentGrade;
 
-public class ProtoStudentSerializer implements Serializer<Student> {
+public class ProtoStudentGradeSerializer implements Serializer<StudentGrade> {
 
     static ProtobufMapper mapper = new ProtobufMapper ();
-	static String protobuf_str = "message Student {\n"
+	static String protobuf_str = "message StudentGrade {\n"
 	            + " required int32 id = 1;\n"
 			    + " required string name = 2;\n"
 	            + " required int32 grade = 3;\n"
@@ -30,7 +30,7 @@ public class ProtoStudentSerializer implements Serializer<Student> {
 	}
     static ObjectWriter writer = mapper.writer(schema);
 	
-	public byte[] serialize(String topic, Student data) {
+	public byte[] serialize(String topic, StudentGrade data) {
 	    byte[] protobufData=null;
 	    
 		try {

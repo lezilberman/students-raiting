@@ -1,4 +1,4 @@
-package com.students.config;
+package com.students.exception;
 
 import java.util.Map;
 
@@ -12,13 +12,13 @@ public class DeserializerErrorHandler implements DeserializationExceptionHandler
 
     private static final Logger LOG = LoggerFactory.getLogger(DeserializerErrorHandler.class);
 	
-	@Override
+//	@Override
 	public DeserializationHandlerResponse handle(ProcessorContext context, ConsumerRecord<byte[], byte[]> record, Exception exception) {
         LOG.error("Received a deserialize error for {} cause {}", record, exception);
 		return DeserializationHandlerResponse.CONTINUE;
 	}
 	
-	@Override
+//	@Override
 	public void configure(Map<String, ?> arg0) {
 
 	} 
