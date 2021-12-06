@@ -36,7 +36,7 @@ services:
   gradegenerator:  
     build:
       dockerfile: Dockerfile
-      context: ./student-grade-gen
+      context: ./students-grade-generator
     image: gradegenerator
     depends_on:
       - zookeeper
@@ -47,7 +47,7 @@ services:
   gradestore0:  
     build:
       dockerfile: Dockerfile0
-      context: ./student-grade-service
+      context: ./students-web-service
     image: gradestore0
     ports:  
       - "8087:8087"  
@@ -61,7 +61,7 @@ services:
   gradestore1:  
     build:
       dockerfile: Dockerfile1
-      context: ./student-grade-service    
+      context: ./students-web-service    
     image: gradestore1
     ports:  
       - "8088:8088"  
@@ -75,7 +75,7 @@ services:
   gradestore2:  
     build:
       dockerfile: Dockerfile2
-      context: ./student-grade-service   
+      context: ./students-web-service   
     image: gradestore2
     ports:  
       - "8089:8089"      
