@@ -6,16 +6,16 @@ run as Docker containers. The results per student Id must be available through t
 
 2. Project structure
 ====================
-The Kafka Streams students-statistics project consists of two modules:
+The Kafka Streams students-raiting maven project consists of two modules:
 
-1) student-grade-gen - a data producer that randomly generates a stream of student's grades (class 
+1) students-grade-generator - a data producer that randomly generates a stream of student's grades (class 
        StudentGrade, see "Model description" section below) in the topic "students". Implemented as Spring Boot Kafka 
     client, uses Spring Cloud Stream API. 
        The duration of the generator in milliseconds is defined by the thread.duration configuration parameter in the 
     application-docker.properties file. The default duration defined in the com.students.mock.DataGenerator class.
-	The student.minId and student.maxId parameters are defined similarly.    
+	The range of student Id values is determined using the student.minId and student.maxId parameters in a similar way.  
     
-2) student-grade-service - consumer with three partitions. Implemented as Apache kafka streams client that summarizes 
+2) students-web-service - consumer with three partitions. Implemented as Apache kafka streams client that summarizes 
     the input stream into the table of average grades for each student and supports Interactive REST Queries with REST  
     API endpoint: http://localhost:8087/StudentAverageGrade/:Id.
     
@@ -25,7 +25,7 @@ The Kafka Streams students-statistics project consists of two modules:
     1. port of the application web service, required argument - integer. In this case, we chose the values 8087, 8088 ...
     2. application launch mode - applicative or in a docker container, optional argument - string "application" or "docker".
        By default, it is assumed that the application is launched in a docker container.
-       Application mode is used for debugging purposes. 
+       Application mode can be used for debugging purposes. 
     
     The service configuration described in the section 4) "Service Configuration".
         
@@ -49,13 +49,16 @@ The Kafka Streams students-statistics project consists of two modules:
    The scalability of the service is provided by several partitions, each of which is a running instance 
    with its own arguments. Service configuration is determined by the following files.
    
-   1) Partition Dockerfiles. Located in the root directory of the service ${PROJECT_DIR}/student-grade-service. 
+   1) Partition Dockerfiles. Located in the root directory of the service ${PROJECT_DIR}/students-web-service. 
       Passes the web service port to the image as an argument.
       
    2) Partition configuration file partitions.yml. Located in the root directory of the service.
       Describes the correspondence between web port and service name for each partition.
       The project uses the Apache Commons Configuration software library to read and parse the producer 
       and consumer configuration files.
+      
+   3) The docker-compose.yml file, located in the root directory of the project, determines the configuration 
+      of the project as a whole, including the number and configuration of partitions. 
 
 5. Add(remove) new partition with index N
 =========================================
@@ -76,14 +79,15 @@ The Kafka Streams students-statistics project consists of two modules:
        Something like this: "8090": gradestore3;
        
     4. For debug in application mode please update --partitions field in 
-       the create_students_topic.bat located in the resources directory 
-       ${PROJECT_DIR}/student-grade-service/src/main/resources.
+       the create_students_topic.bat/sh located in the resources directory 
+       ${PROJECT_DIR}/students-web-service/src/main/resources.
    
 6. Testing guidelines
 =====================
-1) Open console in the project root directory ${PROJECT_DIR}.
-2) Run command 'docker-composer up'.
-3) When testing an application, you need to take into account 2 points:
+1) Download project from GitHub, import it into IDE and compile.
+2) Open the console (e.g. Git Bash) in the project root directory ${PROJECT_DIR}.
+3) Run Docker. Run command 'docker-composer up'.
+4) When testing an application, you need to take into account 2 points:
     1. The generator runs for a limited time (600 seconds by default).
     2. The range of Id generation can be so large (1,000,000 e.g.),
        that at any given time, most of the Id values do not yet exist.
@@ -92,7 +96,7 @@ The Kafka Streams students-statistics project consists of two modules:
    ||| STUDENT |||  id =  498   avg.grade = 15.00
    ||| STUDENT |||  id =  321   avg.grade = 21.00
 
-4) Open browser and go to REST API endpoint: http://localhost:8087/StudentAverageGrade/:Id
+5) Open browser and go to REST API endpoint: http://localhost:8087/StudentAverageGrade/:Id
    or open POSTMAN and use STUDENTS-RAITING.postman_collection.json located in the service
    root directory.
 
