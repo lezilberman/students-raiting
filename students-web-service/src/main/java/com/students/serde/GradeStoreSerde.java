@@ -15,11 +15,11 @@ public class GradeStoreSerde implements Serde<GradeStore> {
 		this.serializer = new ProtoGradeStoreSerializer();
 		this.deserializer = new ProtoGradeStoreDeserializer();
 	}
-	@Override
+
 	public Deserializer<GradeStore> deserializer() {
 		return deserializer;
 	}
-	@Override
+
 	public Serializer<GradeStore> serializer() {
 		return serializer;
 	}
