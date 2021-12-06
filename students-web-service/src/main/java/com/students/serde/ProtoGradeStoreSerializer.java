@@ -35,7 +35,6 @@ public class ProtoGradeStoreSerializer implements Serializer<GradeStore> {
 	}
     static ObjectWriter writer = mapper.writer(schema);
 	
-    @Override
 	public byte[] serialize(String topic, GradeStore data) {
 	    byte[] protobufData=null;
 	    

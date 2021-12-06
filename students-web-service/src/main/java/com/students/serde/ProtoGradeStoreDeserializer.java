@@ -34,7 +34,7 @@ public class ProtoGradeStoreDeserializer implements Deserializer<GradeStore> {
 	    }
 	}
     static ObjectReader reader = mapper.reader(schema).forType(GradeStore.class);
-    @Override
+
 	public GradeStore deserialize(String topic, byte[] data) {
 
 		GradeStore gradeStore = null;
