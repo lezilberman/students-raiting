@@ -84,9 +84,15 @@ The Kafka Streams students-raiting maven project consists of two modules:
    
 6. Testing guidelines
 =====================
-1) Download project from GitHub, import it into IDE and compile.
+1) Download project from GitHub, import it into IDE and compile with compiler
+   compliance level 1.8 (Java 8).
+      To set this in the Eclipse IDE go to Window > Preferences > Java > Installed JREs.
+   Make sure jre 1.8.0_281 or later is listed or add it. Then go Java > Compiler and
+   set Compiler compliance level value 1.8 from drop-down list. 
+      Using the Configure Project Specific Settings link, you can set this setting 
+   specifically for both project modules.  
 2) Open the console (e.g. Git Bash) in the project root directory ${PROJECT_DIR}.
-3) Run Docker. Run command 'docker-composer up'.
+3) Run Docker. Run command 'docker-compose up'.
 4) When testing an application, you need to take into account 2 points:
     1. The generator runs for a limited time (600 seconds by default).
     2. The range of Id generation can be so large (1,000,000 e.g.),
