@@ -49,16 +49,17 @@ The Kafka Streams students-raiting maven project consists of two modules:
    The scalability of the service is provided by several partitions, each of which is a running instance 
    with its own arguments. Service configuration is determined by the following files.
    
-   1) Partition Dockerfiles. Located in the root directory of the service ${PROJECT_DIR}/students-web-service. 
-      Passes the web service port to the image as an argument.
+   1) Dockerfiles of Partitions. Located in the root directory of the service ${PROJECT_DIR}/students-web-service. 
+	  Uses a multi-stage build of a Docker image. The first stage is used to build the code. The second stage 
+	  wraps the built jar and a JRE into a Docker image. Passes the web service port to the image as an argument.
       
-   2) Partition configuration file partitions.yml. Located in the root directory of the service.
+   2) Partition configuration file partitions.yml located in the root directory of the service.
       Describes the correspondence between web port and service name for each partition.
       The project uses the Apache Commons Configuration software library to read and parse the producer 
       and consumer configuration files.
       
    3) The docker-compose.yml file, located in the root directory of the project, determines the configuration 
-      of the project as a whole, including the number and configuration of partitions. 
+      of the project as a whole, including the number and configuration of partitions. Uses 'build' configuration option.
 
 5. Add(remove) new partition with index N
 =========================================
@@ -84,25 +85,24 @@ The Kafka Streams students-raiting maven project consists of two modules:
    
 6. Testing guidelines
 =====================
-1) Download project from GitHub, import it into IDE and compile with compiler
-   compliance level 1.8 (Java 8).
-      To set this in the Eclipse IDE go to Window > Preferences > Java > Installed JREs.
-   Make sure jre 1.8.0_281 or later is listed or add it. Then go Java > Compiler and
-   set Compiler compliance level value 1.8 from drop-down list. 
-      Using the Configure Project Specific Settings link, you can set this setting 
-   specifically for both project modules.  
-2) Open the console (e.g. Git Bash) in the project root directory ${PROJECT_DIR}.
-3) Run Docker. Run command 'docker-compose up'.
-4) When testing an application, you need to take into account 2 points:
-    1. The generator runs for a limited time (600 seconds by default).
-    2. The range of Id generation can be so large (1,000,000 e.g.),
-       that at any given time, most of the Id values do not yet exist.
-   So student Id values for testing you can find in the application console log:
+1) Download project from GitHub and import it into IDE. The project is written in Java 8.
+2) Run Docker Desktop. 
+3) Open the console (e.g. Git Bash) in the project root directory ${PROJECT_DIR}.
+   Run command 'docker-compose up'.
+4) When you run the application for the first time, wait a bit while the data generator and 
+   three partition images are built and run.
+   An indication that the necessary data has been built is the following output to the console:
 
    ||| STUDENT |||  id =  498   avg.grade = 15.00
    ||| STUDENT |||  id =  321   avg.grade = 21.00
 
-5) Open browser and go to REST API endpoint: http://localhost:8087/StudentAverageGrade/:Id
+5) When testing an application, you need to take into account 2 points:
+    1. The generator runs for a limited time (600 seconds by default).
+    2. The range of Id generation can be so large (1,000,000 e.g.),
+       that at any given time, most of the Id values do not yet exist.
+    So student Id values for testing you can find in the application console log.
+
+6) Open browser and go to REST API endpoint: http://localhost:8087/StudentAverageGrade/:Id
    or open POSTMAN and use STUDENTS-RAITING.postman_collection.json located in the service
    root directory.
 
